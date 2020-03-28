@@ -87,11 +87,15 @@ class Blockchain {
             if (block) {
                 self.chain.push(block);
                 self.height++;
+                // self.validateChain().then(errorLog => {
+                //     console.log(errorLog);
+                // })
                 resolve(block);
             }
             else {
                 reject(Error("Error adding block."));
             }
+
         });
     }
 
@@ -227,11 +231,13 @@ class Blockchain {
         let self = this;
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
-            self.chain.forEach(block => {
+            self.chain.forEach(async block => {
                 //Validate block hash is valid
-                if (!block.validate()) {
-                    errorLog.push('Block ' + block.hash + ' is invalid.');
-                }
+                block.validate().then(isValid => {
+                    if (!isValid) {
+                        errorLog.push('Block ' + block.hash + ' is invalid.');
+                    }
+                });
 
                 //Validate previous block hash matches (excluding genesis block)
                 if (block.height > 0) {
